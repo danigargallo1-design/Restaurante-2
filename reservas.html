@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reservas | La Antigua Mesa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --marron:#7a4a2e;
+    --oscuro:#1e1a17;
+    --verde:#2f7a55;
+    --gris:#bbb;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Montserrat',sans-serif;
+    background:linear-gradient(180deg,#f7f2ea,#efe8dc);
+}
+.topbar{background:var(--oscuro);padding:12px 20px}
+.topbar a{color:#e6d8c3;text-decoration:none}
+main{display:flex;justify-content:center;padding:20px}
+.contenedor{width:100%;max-width:900px}
+.header{text-align:center;margin-bottom:20px}
+.header h1{font-family:'Playfair Display',serif;font-size:2.3rem}
+.card{background:white;border-radius:24px;padding:24px;box-shadow:0 30px 50px rgba(0,0,0,.18)}
+.mes-barra{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.mes-barra button{background:none;border:none;font-size:1.6rem;color:var(--marron);cursor:pointer}
+.semana,.dias{display:grid;grid-template-columns:repeat(7,1fr)}
+.semana{font-size:.75rem;color:#777;margin-bottom:6px}
+.semana div{text-align:center;font-weight:600}
+.dias{gap:8px}
+.dia{padding:14px 0;border-radius:14px;text-align:center;font-weight:600}
+.libre{background:#ecf6f1;color:var(--verde);cursor:pointer}
+.pasado{background:#f0f0f0;color:var(--gris)}
+.seleccionado{background:var(--marron)!important;color:white}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center}
+.modal{background:white;padding:26px;width:92%;max-width:380px;border-radius:24px}
+.modal input,.modal select{width:100%;padding:13px;margin-bottom:12px;border:none;border-radius:14px;background:#f2f2f2}
+.acciones{display:flex;gap:10px}
+.confirmar{flex:1;background:var(--marron);color:white;border:none;border-radius:30px;padding:14px}
+.cancelar{flex:1;background:#ddd;border:none;border-radius:30px;padding:14px}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <a href="index.html">← Volver</a>
+</div>
+
+<main>
+<div class="contenedor">
+
+<div class="header">
+    <h1>Reserva tu mesa</h1>
+</div>
+
+<div class="card">
+    <div class="mes-barra">
+        <button onclick="cambiarMes(-1)">‹</button>
+        <div id="mes"></div>
+        <button onclick="cambiarMes(1)">›</button>
+    </div>
+
+    <div class="semana">
+        <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+    </div>
+
+    <div class="dias" id="dias"></div>
+</div>
+
+</div>
+</main>
+
+<div id="modal" onclick="cerrarModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <form id="formReserva">
+            <input id="nombre" placeholder="Nombre" required>
+            <input id="telefono" placeholder="Teléfono" required>
+            <select id="personas" required></select>
+            <select id="hora" required></select>
+
+            <div class="acciones">
+                <button type="button" class="cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="confirmar" id="btnConfirmar">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  increment,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* =======================
+   FIREBASE
+======================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyB5YE3HZRdRlmGEMajZVBMeZzGmdlExf9I",
+  authDomain: "el-condor-b07c5.firebaseapp.com",
+  projectId: "el-condor-b07c5",
+  storageBucket: "el-condor-b07c5.firebasestorage.app",
+  messagingSenderId: "529637701842",
+  appId: "1:529637701842:web:b852858a84038b3a55950b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* =======================
+   ELEMENTOS DOM
+======================= */
+const diasEl = document.getElementById("dias");
+const mesEl = document.getElementById("mes");
+const modal = document.getElementById("modal");
+const personasEl = document.getElementById("personas");
+const horaEl = document.getElementById("hora");
+const form = document.getElementById("formReserva");
+const btn = document.getElementById("btnConfirmar");
+
+/* =======================
+   CONFIGURACIÓN
+======================= */
+const HORAS = ["13:30","14:30","20:30","21:30"];
+const LIMITE = 6;
+
+/* =======================
+   ESTADO
+======================= */
+let fecha = new Date();
+let diaSel = null;
+let enviando = false;
+
+/* =======================
+   PERSONAS
+======================= */
+for (let i = 1; i <= 10; i++) {
+  personasEl.innerHTML += `<option value="${i}">${i} persona${i>1?"s":""}</option>`;
+}
+
+/* =======================
+   CALENDARIO
+======================= */
+function render(){
+  diasEl.innerHTML = "";
+  mesEl.textContent = fecha
+    .toLocaleString("es",{month:"long",year:"numeric"})
+    .toUpperCase();
+
+  const y = fecha.getFullYear();
+  const m = fecha.getMonth();
+  const first = (new Date(y,m,1).getDay()+6)%7;
+  const total = new Date(y,m+1,0).getDate();
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+  for(let i=0;i<first;i++){
+    diasEl.innerHTML += `<div class="dia vacio"></div>`;
+  }
+
+  for(let d=1; d<=total; d++){
+    const div = document.createElement("div");
+    div.className = "dia";
+    div.textContent = d;
+
+    const actual = new Date(y,m,d);
+    actual.setHours(0,0,0,0);
+
+    if(actual < hoy){
+      div.classList.add("pasado");
+    }else{
+      div.classList.add("libre");
+      div.onclick = async ()=>{
+        diaSel = d;
+        await cargarHoras();
+        modal.style.display = "flex";
+      };
+    }
+
+    diasEl.appendChild(div);
+  }
+}
+
+/* =======================
+   HORAS
+======================= */
+async function cargarHoras() {
+  horaEl.innerHTML = `<option value="">Hora</option>`;
+
+  const personas = parseInt(personasEl.value, 10) || 1;
+
+  const fechaTexto =
+    `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(diaSel).padStart(2, "0")}`;
+
+  for (const h of HORAS) {
+    const ref = doc(db, "aforo", `${fechaTexto}_${h}`);
+    const snap = await getDoc(ref);
+
+    const ocupadas = snap.exists() ? (snap.data().ocupadas || 0) : 0;
+
+    // 🔑 CLAVE: depende de personas seleccionadas
+    if (ocupadas + personas <= LIMITE) {
+      horaEl.innerHTML += `<option value="${h}">${h}</option>`;
+    }
+  }
+
+  if (horaEl.children.length === 1) {
+    horaEl.innerHTML = `<option value="">No hay horas disponibles</option>`;
+  }
+}
+personasEl.addEventListener("change", () => {
+  if (diaSel) {
+    cargarHoras();
+  }
+});
+
+
+/* =======================
+   CONFIRMAR RESERVA
+======================= */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (enviando) return;
+
+  const nombre = document.getElementById("nombre").value.trim();
+  const telefono = document.getElementById("telefono").value.trim();
+  const personas = parseInt(personasEl.value, 10);
+  const hora = horaEl.value;
+
+  if (!hora) {
+    alert("Selecciona una hora disponible");
+    return;
+  }
+
+  enviando = true;
+  btn.textContent = "Confirmando…";
+  btn.disabled = true;
+
+  try {
+    const fechaTexto =
+      `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(diaSel).padStart(2, "0")}`;
+
+    const aforoId = `${fechaTexto}_${hora}`;
+    const aforoRef = doc(db, "aforo", aforoId);
+
+    // 🔍 comprobar aforo actual
+    const snap = await getDoc(aforoRef);
+    const ocupadas = snap.exists() ? (snap.data().ocupadas || 0) : 0;
+
+    // ❌ si se acaba de llenar
+    if (ocupadas + personas > LIMITE) {
+      alert("Esta hora acaba de completarse. Selecciona otra.");
+
+      await cargarHoras();   // refresca opciones
+      horaEl.value = "";     // limpia selección
+
+      return;
+    }
+
+    // ✅ actualizar aforo
+    await setDoc(
+      aforoRef,
+      {
+        fecha: fechaTexto,
+        hora,
+        ocupadas: increment(personas),
+        limite: LIMITE
+      },
+      { merge: true }
+    );
+
+    // ✅ guardar reserva
+    await setDoc(doc(db, "reservas", crypto.randomUUID()), {
+      fecha: fechaTexto,
+      hora,
+      personas,
+      nombre,
+      telefono,
+      createdAt: serverTimestamp()
+    });
+
+    // ✅ refrescar horas tras reservar
+    await cargarHoras();
+
+    // ✅ cerrar modal y limpiar formulario
+    modal.style.display = "none";
+    form.reset();
+
+    // ✅ WhatsApp
+    const msg = `Hola 👋
+Reserva confirmada
+📅 ${fechaTexto}
+⏰ ${hora}
+👥 ${personas}
+👤 ${nombre}
+📞 ${telefono}`;
+
+    window.open(
+      `https://wa.me/34643613245?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+
+  } catch (err) {
+    console.error(err);
+    alert("Error al reservar. Inténtalo de nuevo.");
+  } finally {
+    enviando = false;
+    btn.textContent = "Confirmar";
+    btn.disabled = false;
+  }
+});
+
+
+/* =======================
+   GLOBALS
+======================= */
+window.cambiarMes = n=>{
+  fecha.setMonth(fecha.getMonth()+n);
+  render();
+};
+window.cerrarModal = ()=> modal.style.display="none";
+
+/* =======================
+   INIT
+======================= */
+render();
+</script>
+
+</body>
+</html>
