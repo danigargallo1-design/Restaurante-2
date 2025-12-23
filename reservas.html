@@ -399,10 +399,40 @@ main{
   }
 }
 /* =========================
-   REMOVE MOBILE TAP HIGHLIGHT
+   REMOVE MOBILE HIGHLIGHTS (FULL)
 ========================= */
+
+/* Android / Chrome tap highlight */
 *{
   -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS focus ring */
+*:focus{
+  outline: none;
+}
+
+/* Safari iOS blue glow */
+button,
+a,
+input,
+select,
+textarea{
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Remove focus ring on click (but keep accessibility sane) */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible){
+  outline: none;
+  box-shadow: none;
+}
+
+/* Optional: subtle active feedback */
+button:active,
+a:active{
+  opacity: .75;
 }
 
 </style>
@@ -709,6 +739,3 @@ render();
 
 </body>
 </html>
-
-
-
