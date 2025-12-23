@@ -584,151 +584,170 @@ footer{
 }
 
 
-/* Quitar highlight azul en móvil */
+/* ============================= */
+/* ====== MOBILE FIRST ========= */
+/* ============================= */
+
+/* Quitar highlight azul y gestos raros */
 *{
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
+
+button, a, .plato, .foto{
+  touch-action: manipulation;
+}
+
+/* ---------- BREAKPOINT PRINCIPAL ---------- */
 @media (max-width: 768px){
 
-    html{
-        font-size: 92%;
-    }
+  /* BASE */
+  html{
+    font-size: 92%;
+  }
 
-    body{
-        overflow-x: hidden;
-    }
+  body{
+    overflow-x: hidden;
+  }
 
-    /* NAV */
-    nav{
-        padding: 12px 16px;
-    }
+  /* ---------- NAV ---------- */
+  nav{
+    padding: 12px 16px;
+  }
 
-    .logo{
-        font-size: 1.15rem;
-    }
+  .logo{
+    font-size: 1.15rem;
+  }
 
-    .menu a{
-        font-size: .95rem;
-    }
+  .menu{
+    width: 100%;
+    right: 0;
+    text-align: center;
+  }
 
-    /* HERO */
-    header{
-        height: 80vh;
-        padding: 0 6%;
-    }
+  .menu a{
+    padding: 12px 0;
+    font-size: 1.05rem;
+  }
 
-    header h1{
-        font-size: 2.4rem;
-        line-height: 1.05;
-    }
+  /* ---------- HERO ---------- */
+  header{
+    height: 80vh;
+    padding: 0 6%;
+  }
 
-    header p{
-        font-size: .95rem;
-        margin-top: 14px;
-    }
+  header h1{
+    font-size: 2.4rem;
+    line-height: 1.05;
+  }
 
-    .btn-reservas{
-        margin-top: 28px;
-        padding: 13px 30px;
-        font-size: .95rem;
-    }
+  header p{
+    font-size: .95rem;
+    margin-top: 14px;
+  }
 
-    /* SECCIONES */
-    section{
-        padding: 65px 6%;
-    }
+  .btn-reservas{
+    margin-top: 28px;
+    padding: 14px 32px;
+    font-size: .95rem;
+    min-height: 48px; /* dedo */
+  }
 
-    section h2{
-        font-size: 2.05rem;
-        margin-bottom: 28px;
-    }
+  /* ---------- SECCIONES ---------- */
+  section{
+    padding: 65px 6%;
+  }
 
+  section h2{
+    font-size: 2.05rem;
+    margin-bottom: 28px;
+  }
 
- /* FILTROS CARTA – una sola línea en móvil */
-.filtros{
+  /* ---------- FILTROS CARTA ---------- */
+  .filtros{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-}
+  }
 
-.filtros button{
+  .filtros button{
     width: 100%;
-    padding: 8px 0;
+    padding: 10px 0;
     font-size: .82rem;
     border-radius: 22px;
-}
+    min-height: 44px;
+  }
 
-@media (max-width: 360px){
-    .filtros button{
-        font-size: .75rem;
-    }
-}
+  /* ---------- CARTA ---------- */
+  .menu-carta{
+    gap: 18px;
+  }
 
-    /* CARTA */
-    .menu-carta{
-        gap: 18px;
-    }
+  .plato{
+    padding: 20px;
+    border-radius: 16px;
+  }
 
-    .plato{
-        padding: 20px;
-        border-radius: 16px;
-    }
+  .plato h3{
+    font-size: 1.05rem;
+  }
 
-    .plato h3{
-        font-size: 1.05rem;
-    }
+  .plato p{
+    font-size: .9rem;
+    line-height: 1.45;
+  }
 
-    .plato p{
-        font-size: .9rem;
-    }
+  .iconos span{
+    font-size: .8rem;
+    padding: 5px 9px;
+  }
 
-    .iconos span{
-        font-size: .8rem;
-        padding: 5px 9px;
-    }
-
-  /* GALERÍA – móvil más compacta */
-.galeria{
+  /* ---------- GALERÍA ---------- */
+  .galeria{
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+  }
+
+  .foto{
+    height: 180px;
+    border-radius: 16px;
+  }
+
+  /* ---------- RESEÑAS ---------- */
+  .resena{
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    font-size: .95rem;
+  }
+
+  .resena .acciones{
+    align-items: flex-start;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding: 30px 16px;
+    font-size: .85rem;
+  }
 }
+
+/* ---------- MÓVILES MUY PEQUEÑOS ---------- */
 @media (max-width: 360px){
-    .foto{
-        height: 140px;
-    }
+
+  html{
+    font-size: 90%;
+  }
+
+  .filtros button{
+    font-size: .75rem;
+  }
+
+  .foto{
+    height: 140px;
+  }
 }
 
-.foto{
-    height: 160px;
-}
-
-
-    .foto{
-        height: 210px;
-        border-radius: 16px;
-    }
-
-    /* RESEÑAS */
-    .resena{
-        flex-direction: column;
-        gap: 10px;
-        padding: 18px;
-    }
-
-    .resena .acciones{
-        align-items: flex-start;
-    }
-
-    /* FOOTER */
-    footer{
-        padding: 30px 16px;
-        font-size: .85rem;
-    }
-}
-button, a, .plato, .foto{
-    touch-action: manipulation;
-}
 
 </style>
 </head>
@@ -753,8 +772,9 @@ button, a, .plato, .foto{
 <header>
 <div>
 <h1>La Antigua Mesa</h1>
-<p>Alta cocina tradicional desde 1954</p>
-<a href="reservas.html" class="btn-reservas">Reservar mesa</a>
+<p><p>Cocina de toda la vida, hecha como antes</p>
+</p>
+<a href="reservas.html" class="btn-reservas">Reservar ahora</a>
 </div>
 </header>
 
@@ -772,49 +792,48 @@ button, a, .plato, .foto{
 
 <div class="plato entrante">
 <h3>Jamón Ibérico <span class="precio">18€</span></h3>
-<div class="iconos">🥩 ⭐</div>
 <p>Corte a cuchillo con pan cristal.</p>
 </div>
 
 <div class="plato principal">
 <h3>Cordero Asado <span class="precio">22€</span></h3>
-<div class="iconos">👨‍🍳 🥩</div>
+
 <p>Al horno de leña con hierbas.</p>
 </div>
 
 <div class="plato principal">
 <h3>Risotto de Setas <span class="precio">17€</span></h3>
-<div class="iconos">🌱</div>
+
 <p>Cremoso con aceite de trufa.</p>
 </div>
 
 <div class="plato postre">
 <h3>Torrija Caramelizada <span class="precio">8€</span></h3>
-<div class="iconos">🍰 ⭐</div>
+
 <p>Con helado de vainilla.</p>
 </div>
 
 <div class="plato entrante">
     <h3>Quesos Artesanos <span class="precio">14€</span></h3>
-    <div class="iconos">🧀 ⭐</div>
+    
     <p>Selección de quesos nacionales con mermeladas caseras.</p>
 </div>
 
 <div class="plato entrante">
     <h3>Ensalada de Burrata <span class="precio">13€</span></h3>
-    <div class="iconos">🥗 🌱</div>
+    
     <p>Tomate rosa, burrata fresca y pesto de albahaca.</p>
 </div>
 
 <div class="plato principal">
     <h3>Solomillo de Ternera <span class="precio">24€</span></h3>
-    <div class="iconos">🥩 👨‍🍳 ⭐</div>
+    
     <p>A la parrilla con salsa de vino tinto y patatas confitadas.</p>
 </div>
 
 <div class="plato principal">
     <h3>Bacalao Confitado <span class="precio">21€</span></h3>
-    <div class="iconos">🐟 ⭐</div>
+    
     <p>Con pil-pil suave y verduras de temporada.</p>
 </div>
 
@@ -822,7 +841,8 @@ button, a, .plato, .foto{
 </section>
 
 <section id="galeria">
-<h2>Galería</h2>
+<h2><h2>Así se vive La Antigua Mesa</h2>
+</h2>
 
 <div class="galeria">
 
@@ -930,7 +950,7 @@ button, a, .plato, .foto{
 </div>
 
 <div class="add-resena">
-    <button onclick="mostrarFormulario()">✍️ Escribir reseña</button>
+    <button onclick="mostrarFormulario()">Escribir reseña</button>
 </div>
 
 <form id="formResena" class="form-resena" onsubmit="agregarResena(event)">
@@ -950,7 +970,8 @@ button, a, .plato, .foto{
 </section>
 
 <section id="ubicacion">
-<h2>Ubicación</h2>
+<h2><h2>Dónde estamos</h2>
+</h2>
 <iframe src="https://www.google.com/maps?q=Puerta%20del%20Sol%20Madrid&output=embed" width="100%" height="400" style="border-radius:18px;border:none"></iframe>
 </section>
 
